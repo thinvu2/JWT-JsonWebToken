@@ -4,22 +4,17 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { API_ROOT } from '~/utils/constants'
+import authorizedAxiosInstance from '~/utils/authorizedAxios'
 
 function Dashboard() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const res = await axios.get(`${API_ROOT}/v1/dashboards/access`)
-        console.log(res.data)
-        setUser(res.data)
-      } catch (error) {
-        toast.error(error.response?.data?.message || error?.message)
-      }
+      const res = await authorizedAxiosInstance.get(`${API_ROOT}/v1/dashboards/access`)
+      setUser(res.data)
     }
     fetchData()
   }, [])
@@ -50,7 +45,7 @@ function Dashboard() {
       padding: '0 1em'
     }}>
       <Alert severity="info" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
-        Đây là trang Dashboard sau khi user:&nbsp;
+        Dashboard:&nbsp;
         <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>{user?.email}</Typography>
         &nbsp; đăng nhập thành công thì mới cho truy cập vào.
       </Alert>

@@ -1,14 +1,13 @@
 import { StatusCodes } from 'http-status-codes'
 import ms from 'ms'
+import { JwtProvider, ACCESS_TOKEN_SECRET_SIGNATURE, REFRESH_TOKEN_SECRET_SIGNATURE } from '~/providers/JwtProvider'
 const MOCK_DATABASE = {
   USER: {
-    ID: 'trungquandev-sample-id-12345678',
-    EMAIL: 'trungquandev.official@gmail.com',
-    PASSWORD: 'trungquandev@123'
+    ID: 'Ahihi',
+    EMAIL: 'ahihi.@gmail.com',
+    PASSWORD: '123'
   }
 }
-const ACCESS_TOKEN_SECRET_SIGNATURE = 'KBgJwUETt4HeVD05WaXXI9V3JnwCVP'
-const REFRESH_TOKEN_SECRET_SIGNATURE = 'fcCjhnpeopVn2Hg1jG75MUi62051yL'
 
 const login = async (req, res) => {
   try {
@@ -17,11 +16,45 @@ const login = async (req, res) => {
       return
     }
 
-    // Trường hợp nhập đúng thông tin tài khoản, tạo token và trả về cho phía Client
+// create payload information to attach in JWT token: includes id, email of user
+const userInfo = {
+  id: MOCK_DATABASE.USER.ID,
+  email: MOCK_DATABASE.USER.EMAIL
+}
+//Create two types token: accessToken and refreshToken
+const accessToken = await JwtProvider.generateToken(
+   userInfo,
+   ACCESS_TOKEN_SECRET_SIGNATURE,
+   '10s'
+)
 
-    res.status(StatusCodes.OK).json({ message: 'Login API success!' })
+const refreshToken = await JwtProvider.generateToken(
+  userInfo,
+  REFRESH_TOKEN_SECRET_SIGNATURE,
+  '7 days'
+)
+//handle http only
+res.cookie('accessToken', accessToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none',
+  maxAge: ms('7 days')
+})
+
+res.cookie('refreshToken', refreshToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'none',
+  maxAge: ms('7 days')
+})
+// return information user and token for front-end save to localStorage
+res.status(StatusCodes.OK).json({
+  ...userInfo,
+  accessToken,
+  refreshToken
+})
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error)
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'});
   }
 }
 

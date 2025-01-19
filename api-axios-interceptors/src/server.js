@@ -23,9 +23,9 @@ const START_SERVER = () => {
 
   // Use Route APIs V1
   app.use('/v1', APIs_V1)
-  const LOCAL_DEV_APP_PORT = 8017
+  const LOCAL_DEV_APP_PORT = 8020
   const LOCAL_DEV_APP_HOST = 'localhost'
-  const AUTHOR = 'TrungQuanDev'
+  const AUTHOR = 'Faker'
   app.listen(LOCAL_DEV_APP_PORT, LOCAL_DEV_APP_HOST, () => {
     console.log(`Local DEV: Hello ${AUTHOR}, Back-end Server is running successfully at Host: ${LOCAL_DEV_APP_HOST} and Port: ${LOCAL_DEV_APP_PORT}`)
   })

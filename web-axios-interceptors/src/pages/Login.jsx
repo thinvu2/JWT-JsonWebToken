@@ -7,23 +7,27 @@ import Zoom from '@mui/material/Zoom'
 import Alert from '@mui/material/Alert'
 import { useForm } from 'react-hook-form'
 import Typography from '@mui/material/Typography'
-import TrungQuanDevIcon from '../assets/trungquandev-logo.png'
-import axios from 'axios'
-import { toast } from 'react-toastify'
+import faker from '../assets/logo.png'
+import authorizedAxiosInstance from '~/utils/authorizedAxios'
 import { API_ROOT } from '~/utils/constants'
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm()
+  const navigate = useNavigate()
 
   const submitLogIn = async (data) => {
-    console.log('submit login: ', data)
-    try {
-      const res = await axios.post(`${API_ROOT}/v1/users/login`, data)
-      console.log(res.data)
-      toast.success(res.data?.message)
-    } catch (error) {
-      toast.error(error.response?.data?.message || error?.message)
+    const res = await authorizedAxiosInstance.post(`${API_ROOT}/v1/users/login`, data)
+    console.log('APi:', res.data)
+    console.log('localstorage:', JSON.parse(localStorage.getItem('userInfo')))
+    const userInfo = {
+      id: res.data.id,
+      email: res.data.email
     }
+    localStorage.setItem('accessToken', res.data.accessToken)
+    localStorage.setItem('refreshToken', res.data.refreshToken)
+    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    navigate('/dashboard')
   }
 
   return (
@@ -33,7 +37,7 @@ function Login() {
       minHeight: '100vh',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      background: 'url("src/assets/trungquandev-bg-img.jpeg")',
+      background: 'url("src/assets/bg.jpeg")',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -43,12 +47,12 @@ function Login() {
         <Zoom in={true} style={{ transitionDelay: '200ms' }}>
           <MuiCard sx={{ minWidth: 380, maxWidth: 380, marginTop: '6em', p: '0.5em 0', borderRadius: 2 }}>
             <Box sx={{ width: '70px', bgcolor: 'white', margin: '0 auto' }}>
-              <img src={TrungQuanDevIcon} alt='trungquandev' width='100%' />
+              <img src={faker} alt='faker' width='100%' />
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', color: theme => theme.palette.grey[500] }}>
               <Box>
-                <Typography>Hint: trungquandev.official@gmail.com</Typography>
-                <Typography>Pass: trungquandev@123</Typography>
+                <Typography>ahihi.@gmail.com</Typography>
+                <Typography>123</Typography>
               </Box>
             </Box>
             <Box sx={{ padding: '0 1em 1em 1em' }}>
