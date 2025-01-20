@@ -4,12 +4,14 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
-import { toast } from 'react-toastify'
 import { API_ROOT } from '~/utils/constants'
 import authorizedAxiosInstance from '~/utils/authorizedAxios'
+import Button from '@mui/material/Button'
+import { useNavigate } from 'react-router-dom'
 
 function Dashboard() {
   const [user, setUser] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,6 +20,17 @@ function Dashboard() {
     }
     fetchData()
   }, [])
+
+  const handleLogout = async () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('userInfo')
+
+    //cookies
+    await authorizedAxiosInstance.delete(`${API_ROOT}/v1/users/logout`)
+    setUser(null)
+    navigate('/login')
+  }
 
   if (!user) {
     return (
@@ -49,7 +62,15 @@ function Dashboard() {
         <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>{user?.email}</Typography>
         &nbsp; đăng nhập thành công thì mới cho truy cập vào.
       </Alert>
-
+    <Button type='button' 
+    variant='contained' 
+    color='info' 
+    size='large' 
+    sx={{ mt: 2, maxWidth: 'min-content', alignSelf: 'flex-end' }}
+    onClick={handleLogout}
+    >
+      Logout
+    </Button>
       <Divider sx={{ my: 2 }} />
     </Box>
   )
