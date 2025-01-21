@@ -25,7 +25,7 @@ const userInfo = {
 const accessToken = await JwtProvider.generateToken(
    userInfo,
    ACCESS_TOKEN_SECRET_SIGNATURE,
-   '1h'
+  5
 )
 
 const refreshToken = await JwtProvider.generateToken(
@@ -33,20 +33,6 @@ const refreshToken = await JwtProvider.generateToken(
   REFRESH_TOKEN_SECRET_SIGNATURE,
   '7 days'
 )
-//handle http only
-res.cookie('accessToken', accessToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-  maxAge: ms('7 days')
-})
-
-res.cookie('refreshToken', refreshToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'none',
-  maxAge: ms('7 days')
-})
 // return information user and token for front-end save to localStorage
 res.status(StatusCodes.OK).json({
   ...userInfo,
@@ -60,8 +46,6 @@ res.status(StatusCodes.OK).json({
 
 const logout = async (req, res) => {
   try {
-    res.clearCookie('accessToken')
-    res.clearCookie('refreshToken')
     res.status(StatusCodes.OK).json({ message: 'Logout API success!' })
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error)
@@ -70,14 +54,9 @@ const logout = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    // cookie
-    const refreshTokenFromCookie = req.cookies?.refreshToken
-    //localstorage
     const refreshTokenFromBody = req.body?.refreshToken
-
     const refreshTokenDecoded = await JwtProvider.verifyToken(
-      //refreshTokenFromCookie,//cookie
-      refreshTokenFromBody,//localstorage
+      refreshTokenFromBody,
       REFRESH_TOKEN_SECRET_SIGNATURE
   )
 //tao accessToken
@@ -88,23 +67,14 @@ const userInfo = {
   const accessToken = await JwtProvider.generateToken(
     userInfo,
     ACCESS_TOKEN_SECRET_SIGNATURE,
-    '1h'
- )
- //res lai access cho truong hop su dung cookie
- res.cookie('accessToken', accessToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-  maxAge: ms('7 days')
-})
+    5
+  )
 
     res.status(StatusCodes.OK).json({ accessToken })
   } catch (error) {
-    console.log(error)
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message: 'error refresh token'})
   }
 }
-
 export const userController = {
   login,
   logout,

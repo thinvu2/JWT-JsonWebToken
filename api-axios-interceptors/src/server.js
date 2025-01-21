@@ -13,9 +13,6 @@ const START_SERVER = () => {
     res.set('Cache-Control', 'no-store')
     next()
   })
-  // Use Cookie
-  app.use(cookieParser())
-
   app.use(cors(corsOptions))
 
   // Enable req.body json data

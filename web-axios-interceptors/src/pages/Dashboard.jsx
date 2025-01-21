@@ -8,6 +8,7 @@ import { API_ROOT } from '~/utils/constants'
 import authorizedAxiosInstance from '~/utils/authorizedAxios'
 import Button from '@mui/material/Button'
 import { useNavigate } from 'react-router-dom'
+import { handleLogoutAPI } from '~/apis'
 
 function Dashboard() {
   const [user, setUser] = useState(null)
@@ -22,13 +23,11 @@ function Dashboard() {
   }, [])
 
   const handleLogout = async () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('userInfo')
 
-    //cookies
-    await authorizedAxiosInstance.delete(`${API_ROOT}/v1/users/logout`)
-    setUser(null)
+    //call api logout
+    await handleLogoutAPI()
+    //neu dung cookie thi xoa userInfo trong localStorage
+   // localStorage.removeItem('userInfo')
     navigate('/login')
   }
 

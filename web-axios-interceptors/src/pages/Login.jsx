@@ -18,8 +18,7 @@ function Login() {
 
   const submitLogIn = async (data) => {
     const res = await authorizedAxiosInstance.post(`${API_ROOT}/v1/users/login`, data)
-    console.log('APi:', res.data)
-    console.log('localstorage:', JSON.parse(localStorage.getItem('userInfo')))
+
     const userInfo = {
       id: res.data.id,
       email: res.data.email
