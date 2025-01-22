@@ -11,12 +11,8 @@ authorizedAxiosInstance.defaults.withCredentials = true
 authorizedAxiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem('accessToken')
-
-    console.log('Access Token from localStorage:', accessToken);
-
-
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`
+    config.headers.Authorization = `Bearer ${accessToken}`
     }
     return config
   },
@@ -25,43 +21,54 @@ authorizedAxiosInstance.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+// khoi tao mot promise cho viec goi API refresh_token
+// muc dich tao Promise nay de khi nhan yeu cau refreshToken dau tien thi hold lai viec goi API refresh_token
+//cho toi khi xong thi moi _retry lai nhung API
+let refreshTokenPromise = null;
 // Add a response interceptor
-
-authorizedAxiosInstance.interceptors.response.use(
-  (response) => {
+authorizedAxiosInstance.interceptors.response.use((response) => {
     return response
   }, async(error) => {
 
     const originalRequest = error.config
     console.log('originalRequest', originalRequest)
 
-    if (error.response?.status === 410 && !originalRequest._retry) {
-      originalRequest._retry = true
-      const refreshToken = localStorage.getItem('refreshToken')
+    if (error.response?.status === 410 && originalRequest) {
+    //  originalRequest._retry = true
 
-     return refreshTokenAPI(refreshToken)
-     .then((res) => {
-      const { accessToken } = res.data
-      localStorage.setItem('accessToken', accessToken)
-      authorizedAxiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`
+      if(!refreshTokenPromise) {
+        const refreshToken = localStorage.getItem('refreshToken')
 
-      return authorizedAxiosInstance(originalRequest)
-     })
-     .catch((_error) => {
-    handleLogoutAPI()
-    .then(() => {
-      location.href = '/login'
-    })
-    return Promise.reject(_error)
-     })
-        
+        refreshTokenPromise = refreshTokenAPI(refreshToken)
+        .then((res) => {
+         const { accessToken } = res.data
+         localStorage.setItem('accessToken', accessToken)
+         authorizedAxiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`
+        })
+        .catch((_error) => {
+       handleLogoutAPI()
+       .then(() => {
+         location.href = '/login'
+       })
+       return Promise.reject(_error)
+        })
+        .finally(() => {
+          //du API refresh_token co thanh cong hay loi thi van luon gan lai cai refreshTokenPromise ve null
+          refreshTokenPromise = null;
+        })
+      }
+//return cai refreshTokenPromise trong truong hop success o day
+      return refreshTokenPromise.then(() => {
+        //quan trong return lai axios instance cua chung ta ket hop cai originalRequest de goi lai nhung API ban dau bi loi
+        return authorizedAxiosInstance(originalRequest)
+      })
     }
     // Redirect to login on 401 error
     if (error.response?.status === 401) {
+      console.log("ahihhi 401")
+
       await handleLogoutAPI()
-      console.log(error.response?.status);
-      console.log('ahihihhi')
-     // location.href = '/login'
+    // location.href = '/login'
     }
     if (error.response?.status !== 410) {
       toast.error(error.response?.data?.message || error?.message)

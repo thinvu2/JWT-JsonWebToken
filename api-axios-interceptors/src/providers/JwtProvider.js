@@ -13,7 +13,7 @@ const generateToken = async (userInfo, secretSignature, tokenLife) => {
     });
   } catch (error) {
     console.error('Error generating token:', error);
-    throw new Error('Error generating token');
+    throw error;
   }
 };
 const verifyToken = async (token, secretSignature) => {
@@ -21,8 +21,8 @@ const verifyToken = async (token, secretSignature) => {
     //
     return JWT.verify(token, secretSignature)
   } catch (error) {
-    console.error('Error generating token:', error);
-    throw new Error('Error generating token')
+  console.error('Error verify token:', error);
+    throw error;
   }
 }
 export const ACCESS_TOKEN_SECRET_SIGNATURE = 'Ts2ECobefZBwATM5jNGQvjWA3kvznNOq'

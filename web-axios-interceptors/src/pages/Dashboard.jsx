@@ -21,9 +21,8 @@ function Dashboard() {
     }
     fetchData()
   }, [])
-
+  
   const handleLogout = async () => {
-
     //call api logout
     await handleLogoutAPI()
     //neu dung cookie thi xoa userInfo trong localStorage
